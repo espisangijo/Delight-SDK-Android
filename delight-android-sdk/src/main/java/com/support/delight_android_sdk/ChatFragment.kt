@@ -6,6 +6,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
@@ -33,11 +35,17 @@ class ChatFragment : BottomSheetDialogFragment() {
     ): View? {
         val view : View = inflater.inflate(R.layout.fragment_chat, container, false)
         val textView = view.findViewById<TextView>(R.id.response)
+        val button = view.findViewById<Button>(R.id.send_message)
+        val editText = view.findViewById<EditText>(R.id.edit_text)
+        button.setOnClickListener {
+            changeText(editText.text.toString())
+            Log.d("ChatFragment", "Button clicked")
+        }
         textView.setOnClickListener {
             activity?.let {
                 Toast.makeText(activity, "text", Toast.LENGTH_LONG).show()
             }
-            Log.d("ChatFragment", "Clicked")
+            Log.d("ChatFragment", "Text clicked")
         }
         return view
     }
