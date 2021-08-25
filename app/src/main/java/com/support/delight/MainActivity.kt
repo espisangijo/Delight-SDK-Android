@@ -6,12 +6,12 @@ import com.support.delight_android_sdk.ChatFragment
 
 class MainActivity : AppCompatActivity() {
 
-    val chatFragment = ChatFragment();
+    private lateinit var chatFragment: ChatFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
+        chatFragment = ChatFragment()
         val ft = supportFragmentManager.beginTransaction()
         ft.replace(R.id.accelerate, chatFragment)
         ft.commit()
