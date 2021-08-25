@@ -14,6 +14,7 @@ class MainActivity : AppCompatActivity() {
 
         val ft = supportFragmentManager.beginTransaction()
         ft.replace(R.id.accelerate, chatFragment)
+        ft.commit()
     }
 
 }

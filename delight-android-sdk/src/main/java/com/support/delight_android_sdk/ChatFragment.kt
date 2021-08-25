@@ -38,10 +38,6 @@ class ChatFragment : BottomSheetDialogFragment() {
         val textView = view.findViewById<TextView>(R.id.text_view)
         val buttonView = view.findViewById<Button>(R.id.send_message)
         val editTextView = view.findViewById<EditText>(R.id.text_input_edittext)
-        textView.setOnClickListener {
-            changeText((1..6).random().toString())
-            Log.d("ChatFragment", "TextView Clicked")
-        }
 
         buttonView.setOnClickListener {
             changeText(editTextView.text.toString())
