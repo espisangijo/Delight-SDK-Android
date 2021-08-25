@@ -6,4 +6,6 @@
     <string name="bottom_sheet_option_heading">Add Photo</string>
     <string name="bottom_sheet_option_remove_photo">Remove Photo</string>
     <string name="delight">Delight</string>
+    <string name="type_here">Type here</string>
+    <string name="send_message">Send</string>
 </resources>
