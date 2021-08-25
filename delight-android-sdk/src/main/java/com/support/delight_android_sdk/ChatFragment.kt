@@ -10,8 +10,10 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.support.delight_android_sdk.model.DelightResponse
 import com.support.delight_android_sdk.repository.Repository
 import org.w3c.dom.Text
 
@@ -47,6 +49,16 @@ class ChatFragment : BottomSheetDialogFragment() {
             }
             Log.d("ChatFragment", "Text clicked")
         }
+
+        viewModel.myResponse.observe(this, Observer {
+            response ->
+                if (response.isSuccessful) {
+                    Log.d("ChatFragment", response.body()?.text.toString())
+                } else {
+                    Log.e("ChatFragment", response.errorBody().toString())
+                }
+
+        })
         return view
     }
 

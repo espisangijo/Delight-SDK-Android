@@ -16,11 +16,11 @@ import retrofit2.Response
 
 class DelightViewModel(private val repository: Repository): ViewModel() {
 
-    val myResponse: MutableLiveData<DelightResponse> = MutableLiveData()
+    val myResponse: MutableLiveData<Response<DelightResponse>> = MutableLiveData()
 
     fun getDelightResponse(request : DelightRequest, webhookUrl : String) {
         viewModelScope.launch{
-            val response:DelightResponse = repository.getDelightResponse(request, webhookUrl)
+            val response: Response<DelightResponse> = repository.getDelightResponse(request, webhookUrl)
             myResponse.value = response
         }
     }
