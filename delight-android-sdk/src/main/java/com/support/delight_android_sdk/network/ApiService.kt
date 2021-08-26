@@ -11,6 +11,6 @@ interface ApiService {
     suspend fun connect(@Path("webhookUrl") webhookUrl: String) : String
 
     @FormUrlEncoded
-    @POST("webhook/{webhookUrl}")
+    @POST("webhook{webhookUrl}")
     suspend fun getDelightResponse(@Body requestBody: DelightRequest, @Path("webhookUrl") webhookUrl: String): Response<DelightResponse>
 }
