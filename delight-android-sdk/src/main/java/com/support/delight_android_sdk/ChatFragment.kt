@@ -32,10 +32,12 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.R.attr.data
 import android.annotation.SuppressLint
+import android.app.Dialog
+import androidx.fragment.app.Fragment
+import com.google.android.material.bottomsheet.BottomSheetDialog
 
 
-class ChatFragment (webhook: String) : BottomSheetDialogFragment() {
-
+open class ChatFragment (webhook: String) : Fragment() {
     private val webhookUrl =
         if(webhook.startsWith('/'))
             webhook.slice(1 until webhook.length)
@@ -90,8 +92,6 @@ class ChatFragment (webhook: String) : BottomSheetDialogFragment() {
         _binding = FragmentChatBinding.inflate(inflater, container, false)
         val view = binding.root
 
-        Log.d(TAG, SpeechRecognizer.isRecognitionAvailable(requireContext()).toString())
-
         adapter = MessagingAdapter()
         recyclerView = binding.rvMessages
         recyclerView.adapter = adapter
@@ -100,9 +100,7 @@ class ChatFragment (webhook: String) : BottomSheetDialogFragment() {
 
         return view
     }
-
-    @SuppressLint("ClickableViewAccessibility")
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    fun initBinding() {
         speechRecognizer.setRecognitionListener(object : RecognitionListener {
             override fun onReadyForSpeech(bundle: Bundle) {
                 Log.d(TAG, "onReadyForSpeech")
@@ -171,7 +169,6 @@ class ChatFragment (webhook: String) : BottomSheetDialogFragment() {
         })
 
         binding?.btnAudio.setOnTouchListener { v, event ->
-
             when (event?.action) {
                 MotionEvent.ACTION_DOWN -> {
                     if(checkPermission()){
@@ -214,9 +211,14 @@ class ChatFragment (webhook: String) : BottomSheetDialogFragment() {
         binding?.etMessage.setOnClickListener {
             recyclerView.scrollToPosition(adapter.itemCount - 1)
         }
+    }
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        Log.d(TAG, "onViewCreated")
+        initBinding()
 
         viewModel._lastResponse.observe(this, Observer {
-                response ->
+            response ->
             if(response.isSuccessful) {
                 val timeStamp = Time.timeStamp()
                 val responseText = response.body()?.text.toString()
@@ -278,40 +280,7 @@ class ChatFragment (webhook: String) : BottomSheetDialogFragment() {
             return false
         }
     }
-    companion object {
-        private const val REQUEST_CODE_STT = 1
-    }
 
-    private fun startRecording() {
-        val recordPath = activity?.getExternalFilesDir("/")?.absolutePath
-        recordFile = "file.3gp"
-        isRecording = true
-        mediaRecorder = MediaRecorder().apply {
-            setAudioSource(MediaRecorder.AudioSource.MIC)
-            setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
-            setOutputFile("$recordPath/$recordFile")
-            setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-
-            try {
-                prepare()
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-
-            Log.d(TAG,"start recording")
-            start()
-        }
-
-    }
-
-    private fun stopRecording(){
-        isRecording = false
-        mediaRecorder?.apply {
-            stop()
-            release()
-        }
-        mediaRecorder = null
-    }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
