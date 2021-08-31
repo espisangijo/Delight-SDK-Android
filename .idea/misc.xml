@@ -4,7 +4,16 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.14387031408308004" />
+        <entry key="delight-android-sdk/src/main/res/drawable/ic_baseline_mic_24.xml" value="0.18177083333333333" />
+        <entry key="delight-android-sdk/src/main/res/drawable/ic_mic_black.xml" value="0.18177083333333333" />
+        <entry key="delight-android-sdk/src/main/res/drawable/receive_round_box.xml" value="0.31145833333333334" />
+        <entry key="delight-android-sdk/src/main/res/drawable/round_button.xml" value="0.31145833333333334" />
+        <entry key="delight-android-sdk/src/main/res/drawable/send_round_box.xml" value="0.31145833333333334" />
         <entry key="delight-android-sdk/src/main/res/layout/fragment_chat.xml" value="0.3729571661302645" />
+        <entry key="delight-android-sdk/src/main/res/layout/fragment_chat_layout.xml" value="0.2335735908715013" />
+        <entry key="delight-android-sdk/src/main/res/layout/message_in.xml" value="0.1" />
+        <entry key="delight-android-sdk/src/main/res/layout/message_item.xml" value="0.25" />
+        <entry key="delight-android-sdk/src/main/res/layout/message_out.xml" value="0.1" />
       </map>
     </option>
   </component>
