@@ -78,7 +78,6 @@ class ChatFragment (webhook: String) : BottomSheetDialogFragment() {
             RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
         )
         speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
-        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
 
     }
 
@@ -113,6 +112,7 @@ class ChatFragment (webhook: String) : BottomSheetDialogFragment() {
             }
 
             override fun onRmsChanged(v: Float) {
+                Log.d(TAG, v.toString())
             }
 
             override fun onBufferReceived(bytes: ByteArray) {
@@ -143,16 +143,11 @@ class ChatFragment (webhook: String) : BottomSheetDialogFragment() {
                 Log.d(TAG, "onResults")
 
                 val result = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                Log.d(TAG, "onResult" )
+                Log.i(TAG, "onResults" + result.toString().slice(1 until result.toString().length - 1))
 
-                Log.i(TAG, "onResults" + result.toString())
-                listItems.add(result.toString())
-                if (listItems.count() > 10){
-                    listItems.removeAt(0)
-                }
-                var text = ""
-                listItems.forEach {
-                    text += it + "\n"
-                }
+                var text = result.toString().slice(1 until result.toString().length - 1)
+
                 try {
                     binding?.etMessage.setText(text)
                     speechRecognizer?.startListening(speechRecognizerIntent)
@@ -162,7 +157,7 @@ class ChatFragment (webhook: String) : BottomSheetDialogFragment() {
             }
             override fun onPartialResults(partialResults: Bundle) {
                 Log.d(TAG, "onPartialResults")
-                val result = partialResults.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION)
+                val result = partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 Log.i(TAG, "onPartialResults" + result.toString())
 
             }
