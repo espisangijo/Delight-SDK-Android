@@ -2,20 +2,37 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="#42A5F5"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="500dp"
+    android:maxHeight="500dp"
+    >
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="End of conversation"
+        android:layout_marginTop="100dp"
+        android:textColor="@color/colorPrimary"
+        android:textAlignment="center"
+        app:layout_constraintTop_toTopOf="parent"/>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="fill_parent"
+    android:minHeight="500dp"
+    android:background="@color/colorPrimary"
     android:id="@+id/bottom_sheet_fragment"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
     >
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_height="300dp"
+        app:layout_constraintTop_toTopOf="parent"
+        android:id="@+id/recycler_layout"
+        >
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_messages"
@@ -23,6 +40,7 @@
             android:layout_height="match_parent"
             android:layout_below="@+id/dark_divider"
             tools:itemCount="20"
+            android:padding="10dp"
             tools:listitem="@layout/message_item" />
         <View
             android:layout_width="match_parent"
@@ -30,60 +48,37 @@
             android:background="#42A5F5"
             android:id="@+id/dark_divider"/>
     </RelativeLayout>
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:background="@color/colorAccent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="0dp"
-        android:id="@+id/constraint_layout"
-        >
-
-
-        <TextView
-            android:id="@+id/request_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="30dp"
-            android:layout_marginEnd="44dp"
-            android:backgroundTint="#ffffff"
-            android:src="@drawable/ic_mic_black"
-            android:textColor="@android:color/black"
-            android:textSize="20dp"
-            android:textAlignment="viewEnd"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/response_text" />
-
-        <TextView
-            android:id="@+id/response_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="30dp"
-            android:backgroundTint="#ffffff"
-            android:src="@drawable/ic_mic_black"
-            android:text="hello"
-            android:textColor="@android:color/black"
-            android:textSize="20dp"
-            android:textAlignment="viewStart"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ImageView
         android:id="@+id/btn_audio"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginBottom="20dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:backgroundTint="#ffffff"
-        android:src="@drawable/ic_mic_black"
+        android:src="@drawable/logo"
         android:textColor="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraint_layout"
-        tools:layout_marginBottom="50dp" />
+        app:layout_constraintTop_toBottomOf="@+id/recycler_layout"
+        tools:layout_marginBottom="100dp" />
+
+
+    <TextView
+        android:id="@+id/request_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:backgroundTint="#ffffff"
+        android:src="@drawable/ic_mic_black"
+        android:textColor="@android:color/black"
+        android:textSize="20dp"
+        android:layout_marginTop="20dp"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_audio" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

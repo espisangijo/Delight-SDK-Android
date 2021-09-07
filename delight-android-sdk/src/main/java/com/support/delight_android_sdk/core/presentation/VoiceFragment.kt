@@ -18,6 +18,7 @@ import com.support.delight_android_sdk.R
 import com.support.delight_android_sdk.core.data.repository.Repository
 import android.Manifest
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
@@ -33,6 +34,7 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.support.delight_android_sdk.core.data.Constants.RECEIVE_ID
 import com.support.delight_android_sdk.core.data.Constants.SEND_ID
 import com.support.delight_android_sdk.model.Message
 import com.support.delight_android_sdk.utils.Time
@@ -66,26 +68,7 @@ class VoiceFragment private constructor(val webhookUrl: String?): BottomSheetDia
 
                     Log.d(TAG, "on TTS done")
                     activity?.runOnUiThread {
-                        val constraintLayout =
-                            view?.findViewById<ConstraintLayout>(R.id.constraint_layout)
-                        val constraintSet = ConstraintSet()
-                        if (constraintLayout != null && binding != null) {
-                            constraintSet.clone(constraintLayout)
 
-                            constraintSet.connect(
-                                R.id.response_text,
-                                ConstraintSet.TOP,
-                                R.id.constraint_layout,
-                                ConstraintSet.TOP
-                            )
-                            constraintSet.connect(
-                                R.id.request_text,
-                                ConstraintSet.TOP,
-                                R.id.response_text,
-                                ConstraintSet.BOTTOM
-                            )
-                            constraintSet.applyTo(constraintLayout);
-                        }
                         startListening()
                     }
                 }
@@ -173,16 +156,15 @@ class VoiceFragment private constructor(val webhookUrl: String?): BottomSheetDia
             }
 
             override fun onRmsChanged(v: Float) {
-                Log.d(TAG, v.toString())
                 when {
                     v > 1 -> {
-                        binding?.btnAudio.setImageResource(R.drawable.ic_mic_pink)
+                        binding?.btnAudio.setImageResource(R.drawable.logo)
                     }
                     v > 3 -> {
-                        binding?.btnAudio.setImageResource(R.drawable.ic_mic_red)
+                        binding?.btnAudio.setImageResource(R.drawable.logo)
                     }
                     else -> {
-                        binding?.btnAudio.setImageResource(R.drawable.ic_mic_black)
+                        binding?.btnAudio.setImageResource(R.drawable.logo)
                     }
                 }
             }
@@ -193,52 +175,67 @@ class VoiceFragment private constructor(val webhookUrl: String?): BottomSheetDia
 
             override fun onEndOfSpeech() {
                 Log.d(TAG, "onEndOfSpeech")
+//                if (adapter.messagesList.size === 0) {
+
+//                }
             }
 
             override fun onError(error: Int) {
                 var errorCode = ""
                 when (error) {
-                    SpeechRecognizer.ERROR_AUDIO -> errorCode = "Audio recording error"
-                    SpeechRecognizer.ERROR_CLIENT -> errorCode = "Other client side errors"
-                    SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> errorCode = "Insufficient permissions"
-                    SpeechRecognizer.ERROR_NETWORK -> errorCode = "Network related errors"
-                    SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> errorCode = "Network operation timed out"
+                    SpeechRecognizer.ERROR_AUDIO -> {
+                        errorCode = "Audio recording error"
+                        binding?.requestText.text = "Unable to record audio"
+                    }
+                    SpeechRecognizer.ERROR_CLIENT -> {
+                        errorCode = "Other client side errors"
+                        binding?.requestText.text = "Service unavailable"
+                    }
+                    SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> {
+                        errorCode = "Insufficient permissions"
+                        binding?.requestText.text = "Insufficient permission"
+                    }
+                    SpeechRecognizer.ERROR_NETWORK -> {
+                        errorCode = "Network related errors"
+                        binding?.requestText.text = "Network error"
+                    }
+                    SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> {
+                        errorCode = "Network operation timed out"
+                        binding?.requestText.text = "Network timed out"
+                    }
                     SpeechRecognizer.ERROR_NO_MATCH -> {
                         errorCode = "No recognition result matched"
-                        binding?.requestText.text = ""
+                        binding?.requestText.text = "Try saying \"Hello!\""
                     }
-                    SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> errorCode = "RecognitionService busy"
+                    SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> {
+                        errorCode = "RecognitionService busy"
+                        binding?.requestText.text = "Recognition service is currently used by other app"
+                    }
                     SpeechRecognizer.ERROR_SERVER -> errorCode = "Server sends error status"
-                    SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> errorCode = "No speech input"
+                    SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> {
+                        errorCode = "No speech input"
+                        binding?.requestText.text = "No speech input"
+                    }
                 }
                 Log.d(TAG,errorCode)
             }
 
             override fun onResults(results: Bundle) {
                 Log.d(TAG, "onResults")
-
                 val result = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                binding?.responseText.text = ""
-                val constraintLayout = view?.findViewById<ConstraintLayout>(R.id.constraint_layout)
-                val constraintSet = ConstraintSet()
-                if (constraintLayout != null && binding != null) {
-                    constraintSet.clone(constraintLayout)
-
-                    constraintSet.connect(R.id.request_text, ConstraintSet.TOP, R.id.constraint_layout, ConstraintSet.TOP)
-                    constraintSet.connect(R.id.response_text, ConstraintSet.TOP, R.id.request_text, ConstraintSet.BOTTOM)
-                    constraintSet.applyTo(constraintLayout);
-                }
 
                 if (result != null) {
                     changeText(result.get(0).toString())
                 }
+                adapter.insertMessage(Message(binding?.requestText.text.toString(), SEND_ID, Time.timeStamp() ))
+                recyclerView.scrollToPosition(adapter.itemCount - 1)
                 sendMessage()
             }
             override fun onPartialResults(partialResults: Bundle) {
+                binding?.requestText.alpha = 1.0.toFloat()
                 Log.d(TAG, "onPartialResults")
                 val result = partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                Log.i(TAG, "onPartialResults" + result.toString())
-
+                changeText(result.toString().slice(1 until result.toString().length -1 ))
             }
             override fun onEvent(i: Int, bundle: Bundle) {
                 Log.d(TAG, "onEvent")}
@@ -266,39 +263,40 @@ class VoiceFragment private constructor(val webhookUrl: String?): BottomSheetDia
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         bottomSheetBehavior = BottomSheetBehavior.from(binding?.bottomSheetFragment)
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED;
 //        binding?.bottomSheetFragment.removeView(binding?.rvMessages)
 //        binding?.bottomSheetFragment.addView(binding?.constraintLayout)
-
+        bottomSheetBehavior.isDraggable= false
+//        bottomSheetBehavior.peekHeight = 700
         bottomSheetBehavior.addBottomSheetCallback(object :
             BottomSheetBehavior.BottomSheetCallback() {
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
                 // handle onSlide
                 Log.d(TAG, "on slide")
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
             }
 
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 when (newState) {
-                    BottomSheetBehavior.STATE_COLLAPSED -> {
-                        Log.d(TAG, "collapsed")
-                        val params: ViewGroup.LayoutParams = recyclerView.layoutParams
-                        params.height = 100
-                        recyclerView.layoutParams = params
-                    }
-                    BottomSheetBehavior.STATE_EXPANDED -> {
-                        Log.d(TAG, "expanded")
-
-                        val params: ViewGroup.LayoutParams = recyclerView.layoutParams
-                        params.height = 500
-                        recyclerView.layoutParams = params
-                    }
                     BottomSheetBehavior.STATE_DRAGGING -> {
                         Log.d(TAG, "dragging")
-                        Toast.makeText(requireContext(), "STATE_DRAGGING", Toast.LENGTH_SHORT)
-                            .show()
+                        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
                     }
-                    BottomSheetBehavior.STATE_SETTLING -> Toast.makeText(requireContext(), "STATE_SETTLING", Toast.LENGTH_SHORT).show()
-                    BottomSheetBehavior.STATE_HIDDEN -> Toast.makeText(requireContext(), "STATE_HIDDEN", Toast.LENGTH_SHORT).show()
+//                    BottomSheetBehavior.STATE_EXPANDED -> {
+//                        Log.d(TAG, "expanded")
+//
+//                        val params: ViewGroup.LayoutParams = recyclerView.layoutParams
+//                        params.height = 500
+//                        recyclerView.layoutParams = params
+//                    }
+//                    BottomSheetBehavior.STATE_DRAGGING -> {
+//                        Log.d(TAG, "dragging")
+//                        Toast.makeText(requireContext(), "STATE_DRAGGING", Toast.LENGTH_SHORT)
+//                            .show()
+//                    }
+//                    BottomSheetBehavior.STATE_SETTLING -> Toast.makeText(requireContext(), "STATE_SETTLING", Toast.LENGTH_SHORT).show()
+//                    BottomSheetBehavior.STATE_HIDDEN -> Toast.makeText(requireContext(), "STATE_HIDDEN", Toast.LENGTH_SHORT).show()
                     else -> Toast.makeText(requireContext(), "OTHER_STATE", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -307,16 +305,19 @@ class VoiceFragment private constructor(val webhookUrl: String?): BottomSheetDia
         startListening()
 
         binding?.btnAudio.setOnClickListener {
+            tts?.stop();
             startListening()
         }
         viewModel._messages.observe(this, Observer {
             data ->
                 Log.d(TAG, data.toString())
-                adapter.messagesList = data
         })
         viewModel._lastResponse.observe(this, Observer { response ->
             if (response.isSuccessful) {
-                binding?.responseText.text = response.body()?.text.toString()
+                Log.d(TAG, response.body().toString())
+                binding?.requestText.text = ""
+                adapter.insertMessage(Message(response.body()?.text.toString(), RECEIVE_ID, Time.timeStamp()))
+                recyclerView.scrollToPosition(adapter.itemCount - 1)
                 speakOut(response.body()?.text.toString())
                 Log.d(TAG, response.body()?.text.toString())
             } else {
@@ -331,8 +332,9 @@ class VoiceFragment private constructor(val webhookUrl: String?): BottomSheetDia
             Log.d(TAG, checkPermission().toString())
             try {
                 GlobalScope.launch {
+                    binding?.requestText.alpha = 0.3.toFloat()
+                    binding?.requestText.text = "Listening..."
 
-                    binding?.requestText.text = "<listening>"
                     activity?.runOnUiThread {
 
                         speechRecognizer.startListening(speechRecognizerIntent)
