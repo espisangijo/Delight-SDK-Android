@@ -1,4 +1,4 @@
-package com.support.delight_android_sdk.repository
+package com.support.delight_android_sdk.core.data.repository
 
 import com.support.delight_android_sdk.model.DelightRequest
 import com.support.delight_android_sdk.model.DelightResponse

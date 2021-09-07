@@ -4,16 +4,23 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.14387031408308004" />
+        <entry key="app/src/main/res/layout/fragment_main.xml" value="0.329700272479564" />
+        <entry key="app/src/main/res/layout/fragment_menu.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/navigation.xml" value="0.1" />
+        <entry key="delight-android-sdk/src/main/res/drawable/bg_bottom_sheet_dialog_fragment.xml" value="0.15677083333333333" />
         <entry key="delight-android-sdk/src/main/res/drawable/ic_baseline_mic_24.xml" value="0.18177083333333333" />
         <entry key="delight-android-sdk/src/main/res/drawable/ic_mic_black.xml" value="0.18177083333333333" />
         <entry key="delight-android-sdk/src/main/res/drawable/receive_round_box.xml" value="0.31145833333333334" />
         <entry key="delight-android-sdk/src/main/res/drawable/round_button.xml" value="0.31145833333333334" />
         <entry key="delight-android-sdk/src/main/res/drawable/send_round_box.xml" value="0.31145833333333334" />
-        <entry key="delight-android-sdk/src/main/res/layout/fragment_chat.xml" value="0.3729571661302645" />
+        <entry key="delight-android-sdk/src/main/res/layout/fragment_bottom_dialog.xml" value="0.1" />
+        <entry key="delight-android-sdk/src/main/res/layout/fragment_chat.xml" value="0.17869565217391303" />
         <entry key="delight-android-sdk/src/main/res/layout/fragment_chat_layout.xml" value="0.2335735908715013" />
+        <entry key="delight-android-sdk/src/main/res/layout/fragment_voice.xml" value="0.16529359958795214" />
         <entry key="delight-android-sdk/src/main/res/layout/message_in.xml" value="0.1" />
         <entry key="delight-android-sdk/src/main/res/layout/message_item.xml" value="0.25" />
         <entry key="delight-android-sdk/src/main/res/layout/message_out.xml" value="0.1" />
+        <entry key="delight-android-sdk/src/main/res/layout/recycler_view.xml" value="0.12681159420289856" />
       </map>
     </option>
   </component>

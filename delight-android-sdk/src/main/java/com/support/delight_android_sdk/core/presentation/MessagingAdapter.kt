@@ -1,4 +1,4 @@
-package com.support.delight_android_sdk
+package com.support.delight_android_sdk.core.presentation
 
 import android.annotation.SuppressLint
 import android.util.Log
@@ -7,9 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.support.delight_android_sdk.R
+import com.support.delight_android_sdk.core.data.Constants.RECEIVE_ID
+import com.support.delight_android_sdk.core.data.Constants.SEND_ID
 import com.support.delight_android_sdk.model.Message
-import com.support.delight_android_sdk.utils.Constants.Companion.RECEIVE_ID
-import com.support.delight_android_sdk.utils.Constants.Companion.SEND_ID
 
 class MessagingAdapter: RecyclerView.Adapter<MessagingAdapter.MessageViewHolder>() {
 

@@ -1,8 +1,8 @@
-package com.support.delight_android_sdk
+package com.support.delight_android_sdk.core.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.support.delight_android_sdk.repository.Repository
+import com.support.delight_android_sdk.core.data.repository.Repository
 
 class DelightViewModelFactory(private val repository: Repository): ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {

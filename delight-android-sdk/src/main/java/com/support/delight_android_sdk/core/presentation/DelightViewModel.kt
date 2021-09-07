@@ -1,4 +1,4 @@
-package com.support.delight_android_sdk
+package com.support.delight_android_sdk.core.presentation
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -8,15 +8,10 @@ import com.support.delight_android_sdk.model.Context
 import com.support.delight_android_sdk.model.DelightRequest
 import com.support.delight_android_sdk.model.DelightResponse
 import com.support.delight_android_sdk.model.Message
-import com.support.delight_android_sdk.network.ApiService
-import com.support.delight_android_sdk.network.RetrofitInstance
-import com.support.delight_android_sdk.repository.Repository
+import com.support.delight_android_sdk.core.data.repository.Repository
 import com.support.delight_android_sdk.utils.Constants.Companion.RECEIVE_ID
-import com.support.delight_android_sdk.utils.Constants.Companion.SEND_ID
 import com.support.delight_android_sdk.utils.Time
 import kotlinx.coroutines.launch
-import retrofit2.Call
-import retrofit2.Callback
 import retrofit2.Response
 
 class DelightViewModel(private val repository: Repository): ViewModel() {
@@ -32,7 +27,7 @@ class DelightViewModel(private val repository: Repository): ViewModel() {
             appendMessages(message)
             val request = textToDelightRequest(message.message)
             val response: Response<DelightResponse> = repository.getDelightResponse(request, webhookUrl)
-
+            appendMessages(Message(response.body().toString(), RECEIVE_ID, Time.timeStamp()))
             setLastResponse(response)
         }
     }
