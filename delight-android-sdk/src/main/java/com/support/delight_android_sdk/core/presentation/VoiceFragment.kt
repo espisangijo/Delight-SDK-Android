@@ -17,6 +17,8 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.support.delight_android_sdk.R
 import com.support.delight_android_sdk.core.data.repository.Repository
 import android.Manifest
+import android.content.Context
+import android.content.Context.CONNECTIVITY_SERVICE
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.speech.RecognitionListener
@@ -41,6 +43,17 @@ import com.support.delight_android_sdk.utils.Time
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
+import android.net.Network
+
+import android.net.ConnectivityManager
+import android.net.ConnectivityManager.NetworkCallback
+import android.net.NetworkCapabilities
+
+import android.net.NetworkRequest
+
+
+import androidx.core.content.ContextCompat.getSystemService
+import com.support.delight_android_sdk.core.presentation.util.ConnectionLiveData
 
 
 class VoiceFragment private constructor(val webhookUrl: String?): BottomSheetDialogFragment(), TextToSpeech.OnInitListener {
@@ -50,7 +63,8 @@ class VoiceFragment private constructor(val webhookUrl: String?): BottomSheetDia
         fun setWebhookUrl(webhookUrl: String) = apply {this.webhookUrl = webhookUrl}
         fun build() = VoiceFragment(webhookUrl)
     }
-
+    private var isListening = false
+    private var dismiss = false
     private var tts: TextToSpeech? = null
     override fun onInit(status: Int) {
         if(status == TextToSpeech.SUCCESS) {
@@ -67,10 +81,12 @@ class VoiceFragment private constructor(val webhookUrl: String?): BottomSheetDia
                 override fun onDone(utteranceId: String?) {
 
                     Log.d(TAG, "on TTS done")
+                    if (dismiss == true){
+                        dialog?.let { onDismiss(it) }
+                    } else {
                     activity?.runOnUiThread {
-
                         startListening()
-                    }
+                    }}
                 }
 
                 override fun onError(utteranceId: String?) {
@@ -95,6 +111,7 @@ class VoiceFragment private constructor(val webhookUrl: String?): BottomSheetDia
     private val binding get() = _binding!!
 
     private lateinit var viewModel: DelightViewModel
+    private lateinit var connectionLiveData : ConnectionLiveData
 
     private val MY_PERMISSIONS_RECORD_AUDIO = 1
 
@@ -119,8 +136,11 @@ class VoiceFragment private constructor(val webhookUrl: String?): BottomSheetDia
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         Log.d(TAG, "onCreate")
         super.onCreate(savedInstanceState)
+        connectionLiveData = ConnectionLiveData(requireContext())
+
         if(checkPermission()) {
             initSpeechRecognition()
             initTTS()
@@ -205,7 +225,7 @@ class VoiceFragment private constructor(val webhookUrl: String?): BottomSheetDia
                     }
                     SpeechRecognizer.ERROR_NO_MATCH -> {
                         errorCode = "No recognition result matched"
-                        binding?.requestText.text = "Try saying \"Hello!\""
+                        binding?.requestText.text = "Press the button and try saying \"Hello!\""
                     }
                     SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> {
                         errorCode = "RecognitionService busy"
@@ -223,13 +243,20 @@ class VoiceFragment private constructor(val webhookUrl: String?): BottomSheetDia
             override fun onResults(results: Bundle) {
                 Log.d(TAG, "onResults")
                 val result = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-
+                Log.d(TAG, result.toString())
                 if (result != null) {
                     changeText(result.get(0).toString())
                 }
+
+                Log.d(TAG, binding?.requestText.text.toString())
+
                 adapter.insertMessage(Message(binding?.requestText.text.toString(), SEND_ID, Time.timeStamp() ))
                 recyclerView.scrollToPosition(adapter.itemCount - 1)
-                sendMessage()
+                try {
+                    sendMessage()
+                } catch (e: Exception) {
+                    binding?.requestText.text = "No internet"
+                }
             }
             override fun onPartialResults(partialResults: Bundle) {
                 binding?.requestText.alpha = 1.0.toFloat()
@@ -259,9 +286,45 @@ class VoiceFragment private constructor(val webhookUrl: String?): BottomSheetDia
         return view
     }
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<ConstraintLayout>
+    fun pauseProcesses() {
+        if(tts != null) {
+            tts!!.stop()
+            tts!!.shutdown()
+        }
 
+        if (speechRecognizer != null) {
+            speechRecognizer!!.cancel()
+            speechRecognizer!!.destroy()
+        }
+    }
+    fun resumeProcesses() {
+        initTTS()
+        initSpeechRecognition()
+    }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        connectionLiveData.observe(this, {isNetworkAvailable ->
+            run {
+                if (isNetworkAvailable) {
+                    resumeProcesses()
+                    binding?.btnAudio.setOnClickListener {
+                        tts?.stop();
+                        startListening()
+                    }
+                    binding?.btnAudio.setImageResource(R.drawable.logo)
+                    if (isListening === false) {
+                        startListening()
+                    }
+
+                } else {
+                    pauseProcesses()
+                    isListening = false
+                    binding?.btnAudio.setOnClickListener(null)
+                    binding?.btnAudio.setImageResource(R.drawable.logo_bw)
+                    binding?.requestText.text = "No internet connection"
+                }
+            }
+        })
         bottomSheetBehavior = BottomSheetBehavior.from(binding?.bottomSheetFragment)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED;
 //        binding?.bottomSheetFragment.removeView(binding?.rvMessages)
@@ -283,20 +346,6 @@ class VoiceFragment private constructor(val webhookUrl: String?): BottomSheetDia
                         Log.d(TAG, "dragging")
                         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
                     }
-//                    BottomSheetBehavior.STATE_EXPANDED -> {
-//                        Log.d(TAG, "expanded")
-//
-//                        val params: ViewGroup.LayoutParams = recyclerView.layoutParams
-//                        params.height = 500
-//                        recyclerView.layoutParams = params
-//                    }
-//                    BottomSheetBehavior.STATE_DRAGGING -> {
-//                        Log.d(TAG, "dragging")
-//                        Toast.makeText(requireContext(), "STATE_DRAGGING", Toast.LENGTH_SHORT)
-//                            .show()
-//                    }
-//                    BottomSheetBehavior.STATE_SETTLING -> Toast.makeText(requireContext(), "STATE_SETTLING", Toast.LENGTH_SHORT).show()
-//                    BottomSheetBehavior.STATE_HIDDEN -> Toast.makeText(requireContext(), "STATE_HIDDEN", Toast.LENGTH_SHORT).show()
                     else -> Toast.makeText(requireContext(), "OTHER_STATE", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -319,6 +368,7 @@ class VoiceFragment private constructor(val webhookUrl: String?): BottomSheetDia
                 adapter.insertMessage(Message(response.body()?.text.toString(), RECEIVE_ID, Time.timeStamp()))
                 recyclerView.scrollToPosition(adapter.itemCount - 1)
                 speakOut(response.body()?.text.toString())
+                dismiss = response.body()?.shouldEndConversation ?: false
                 Log.d(TAG, response.body()?.text.toString())
             } else {
                 Log.e(TAG, "error in getting response")
@@ -328,13 +378,13 @@ class VoiceFragment private constructor(val webhookUrl: String?): BottomSheetDia
     }
 
     private fun startListening() {
+        isListening = true
         if(checkPermission()) {
             Log.d(TAG, checkPermission().toString())
             try {
                 GlobalScope.launch {
                     binding?.requestText.alpha = 0.3.toFloat()
                     binding?.requestText.text = "Listening..."
-
                     activity?.runOnUiThread {
 
                         speechRecognizer.startListening(speechRecognizerIntent)
@@ -345,6 +395,7 @@ class VoiceFragment private constructor(val webhookUrl: String?): BottomSheetDia
                 GlobalScope.launch {
                     activity?.runOnUiThread {
                         speechRecognizer.stopListening()
+                        isListening = false
                     }
                 }
             }
@@ -398,6 +449,5 @@ class VoiceFragment private constructor(val webhookUrl: String?): BottomSheetDia
         }
         super.onDestroy()
     }
-
 
 }

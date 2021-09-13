@@ -27,7 +27,23 @@ class DelightViewModel(private val repository: Repository): ViewModel() {
             appendMessages(message)
             val request = textToDelightRequest(message.message)
             val response: Response<DelightResponse> = repository.getDelightResponse(request, webhookUrl)
-            appendMessages(Message(response.body()?.text.toString(), RECEIVE_ID, Time.timeStamp()))
+            if (response.isSuccessful) {
+                appendMessages(
+                    Message(
+                        response.body()?.text.toString(),
+                        RECEIVE_ID,
+                        Time.timeStamp()
+                    )
+                )
+            } else {
+                appendMessages(
+                    Message(
+                        "Check your internet connection",
+                        RECEIVE_ID,
+                        Time.timeStamp()
+                    )
+                )
+            }
             setLastResponse(response)
         }
     }
